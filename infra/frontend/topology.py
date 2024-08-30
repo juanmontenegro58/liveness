@@ -16,11 +16,14 @@ from aws_cdk import (
 )
 
 import aws_cdk.aws_s3_assets as s3_assets
-
+import aws_cdk as cdk
 
 root_directory = path.dirname(__file__)
 bin_directory = path.join(root_directory, "bin")
 
+github_token = cdk.SecretValue.secrets_manager('github-token-secret-id')
+github_repo_owner = 'juanmontenegro58'  # Reemplaza con tu usuario de GitHub
+github_repo_name = 'liveness'
 
 class FaceLivenessFrontEnd(Construct):
     '''
@@ -33,12 +36,12 @@ class FaceLivenessFrontEnd(Construct):
         s3_asset = s3_assets.Asset(self, "Rfl-Web-App-Code",
                                    path="./src/frontend"
                                    )
-        self.appRrepo = codecommit.Repository(self, "Rfl-Web-App-Repo",
-                                                    repository_name='{}-Repo'.format(
-                                                        rfl_stack.stack_name),
-                                                    code=codecommit.Code.from_asset(
-                                                        s3_asset)
-                                              )
+        # self.appRrepo = codecommit.Repository(self, "Rfl-Web-App-Repo",
+        #                                             repository_name='{}-Repo'.format(
+        #                                                 rfl_stack.stack_name),
+        #                                             code=codecommit.Code.from_asset(
+        #                                                 s3_asset)
+        #                                       )
         self.amplify = amplify2.App(self, "Rfl-Web-App",
                                     app_name=rfl_stack.stack_name,
                                     auto_branch_creation=amplify2.AutoBranchCreation(
@@ -50,8 +53,11 @@ class FaceLivenessFrontEnd(Construct):
                                         target="/index.html",
                                         status=amplify2.RedirectStatus.REWRITE
                                     )],
-                                    source_code_provider=amplify2.CodeCommitSourceCodeProvider(
-                                        repository=self.appRrepo)
+                                    source_code_provider=amplify2.GitHubSourceCodeProvider(
+                                            owner=github_repo_owner,
+                                            repository=github_repo_name,
+                                            oauth_token=github_token
+                                        )
                                     )
         self.amplify.add_environment(
             name="REACT_APP_ENV_API_URL", value=apigateway.rest_api_url())
