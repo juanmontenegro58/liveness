@@ -16,12 +16,11 @@ from aws_cdk import (
 )
 
 import aws_cdk.aws_s3_assets as s3_assets
-import aws_cdk as cdk
 
 root_directory = path.dirname(__file__)
 bin_directory = path.join(root_directory, "bin")
 
-github_token = cdk.SecretValue.secrets_manager('github-secret')
+github_token = core.SecretValue.secrets_manager('github-secret')
 github_repo_owner = 'juanmontenegro58'  # Reemplaza con tu usuario de GitHub
 github_repo_name = 'liveness'
 
